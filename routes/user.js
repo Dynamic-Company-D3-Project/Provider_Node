@@ -65,10 +65,23 @@ router.get("/orders", (request, response) => {
     address.state 
    from orders 
   JOIN 
-    USER on orders.user_id = user.id
+    user on orders.user_id = user.id
   JOIN
     address ON address.address_id = orders.address_id
    where provider_id = ?;`;
+  const user_id = request.userId;
+  db.pool.execute(statement, [user_id], (error, data) => {
+    response.send(utils.successError(error, data));
+  });
+});
+
+router.get("/chart", (request, response) => {
+  const statement = `select DATE_FORMAT(order_date, '%Y-%m-%d') as order_date, count(*) from 
+  orders
+   where provider_id = 1 
+  group by order_date
+ `;
+
   const user_id = request.userId;
   db.pool.execute(statement, [user_id], (error, data) => {
     response.send(utils.successError(error, data));
