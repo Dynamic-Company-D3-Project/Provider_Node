@@ -12,7 +12,7 @@ router.post("/login", (request, response) => {
 
   const encryptedPassword = String(crypto.SHA256(password));
   const statement =
-    "SELECT id, first_name, last_name FROM provider WHERE email = ? AND password = ?";
+    "SELECT id, first_name, last_name FROM provider WHERE email = ? AND password = ? and is_deleted = false";
   db.pool.execute(statement, [email, password], (error, result) => {
     if (error) {
       response.send(utils.errorResult(error));
@@ -122,6 +122,15 @@ router.put("/remove", (request, response) => {
   const id = request.query.id;
 
   const statement = `update bookings set status = 'PENDING' ,provider_id = null where provider_id = ? and booking_id = ?;`;
+  const user_id = request.userId;
+  db.pool.execute(statement, [user_id, id], (error, data) => {
+    response.send(utils.successError(error, data));
+  });
+});
+router.put("/accept", (request, response) => {
+  const id = request.query.id;
+
+  const statement = `update bookings set status = 'ONGOING' where provider_id = ? and booking_id = ?;`;
   const user_id = request.userId;
   db.pool.execute(statement, [user_id, id], (error, data) => {
     response.send(utils.successError(error, data));
